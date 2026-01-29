@@ -1,0 +1,20 @@
+# Quarto
+.quarto/
+*_cache/
+*_files/
+
+# RStudio
+.Rproj.user/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Outputs & derived data (typisch nicht versionieren)
+data/interim/
+data/processed/
+output/
+
+# OS
+.DS_Store
