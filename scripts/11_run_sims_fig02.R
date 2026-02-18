@@ -23,7 +23,6 @@ run_sim <- function(met.time, met.tp, met.signal, source,
   ) |>
     RenameFirnRSignal()
   
-  # source direkt dran, damit du es später immer hast
   sim$source <- source
   sim
 }

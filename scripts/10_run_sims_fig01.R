@@ -4,7 +4,6 @@ library(FirnR)
 
 dir.create(here("output", "sims"), recursive = TRUE, showWarnings = FALSE)
 
-endDate  <- as.Date("2018-12-27")
 met.time <- aws$date
 idx      <- met.time <= endDate
 met.tp   <- aws$tp.era5
