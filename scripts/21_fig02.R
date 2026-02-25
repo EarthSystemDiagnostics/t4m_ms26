@@ -106,3 +106,50 @@ ggsave(
   here::here("output", "figures", "Figure2.svg"),
   p, width = 7.2, height = 9.0, units = "in"
 )
+
+
+### Correlation for the papers:
+cor_pair_depth <- function(df, left_source, left_var, right_source, right_var,
+                           method = "pearson") {
+  
+  x <- df %>%
+    dplyr::filter(source == left_source) %>%
+    dplyr::select(depth, x = dplyr::all_of(left_var))
+  
+  y <- df %>%
+    dplyr::filter(source == right_source) %>%
+    dplyr::select(depth, y = dplyr::all_of(right_var))
+  
+  dat <- dplyr::inner_join(x, y, by = "depth") %>%
+    dplyr::filter(is.finite(x), is.finite(y))
+  
+  if (nrow(dat) < 3) {
+    return(tibble::tibble(
+      left_source = left_source, left_var = left_var,
+      right_source = right_source, right_var = right_var,
+      n = nrow(dat), r = NA_real_, p_value = NA_real_
+    ))
+  }
+  
+  ct <- stats::cor.test(dat$x, dat$y, method = method)
+  
+  tibble::tibble(
+    left_source  = left_source,
+    left_var     = left_var,
+    right_source = right_source,
+    right_var    = right_var,
+    n       = nrow(dat),
+    r       = unname(ct$estimate),
+    p_value = ct$p.value
+  )
+}
+
+cor_stats <- dplyr::bind_rows(
+  cor_pair_depth(df_all, "T4M", "d18O", "AWS9 t2m precip ERA", "proxy"),
+  cor_pair_depth(df_all, "T4M", "d18O", "ECHAM6 t2m",          "proxy"),
+  cor_pair_depth(df_all, "T4M", "d18O", "ECHAM6 d18O",         "proxy"),
+  cor_pair_depth(df_all, "ECHAM6 t2m", "proxy", "ECHAM6 d18O",         "proxy"),
+) %>%
+  dplyr::mutate(r = round(r, 3), p_value = signif(p_value, 3))
+
+print(cor_stats)

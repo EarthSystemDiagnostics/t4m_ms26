@@ -100,9 +100,9 @@ p <- ggplot(df, aes(x = year)) +
   geom_line(aes(y = t4m_scaled, color = "T4M (scaled; annual)"), linewidth = 0.7) +
   
   # 5-year means (thick)
-  geom_line(aes(y = signal_5y, color = "Diffused precip.-weighted T (5-year)"), linewidth = 1.2) +
-  geom_line(aes(y = t2m_5y + t2m_shift, color = "ERA5 t2m (5-year)"), linewidth = 1.2) +
-  geom_line(aes(y = t4m_scaled_5y, color = "T4M (scaled; 5-year)"), linewidth = 1.2) +
+#  geom_line(aes(y = signal_5y, color = "Diffused precip.-weighted T (5-year)"), linewidth = 1.2) +
+#  geom_line(aes(y = t2m_5y + t2m_shift, color = "ERA5 t2m (5-year)"), linewidth = 1.2) +
+#  geom_line(aes(y = t4m_scaled_5y, color = "T4M (scaled; 5-year)"), linewidth = 1.2) +
   
   scale_y_continuous(
     name = "Diffused precipitation-weighted T (°C)",

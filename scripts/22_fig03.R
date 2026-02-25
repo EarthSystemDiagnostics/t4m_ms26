@@ -219,3 +219,51 @@ ggsave(
   here::here("output", "figures", "Figure3_scatter_T4M_vs_ECHAM_d18O_annual.pdf"),
   p_sc_echam, width = 6.5, height = 5.0, units = "in"
 )
+
+
+
+
+
+
+##
+# ---- annual correlations with p-values ----
+
+corr_test <- function(df_wide, x_col, y_col) {
+  dat <- df_wide %>% select({{ x_col }}, {{ y_col }}) %>% drop_na()
+  test <- cor.test(dat[[1]], dat[[2]], method = "pearson")
+  list(
+    r = unname(test$estimate),
+    p = test$p.value,
+    n = nrow(dat)
+  )
+}
+
+# T4M vs AWS (proxy from AWS t2m + reanalysis precip)
+res_aws <- corr_test(
+  df_annual_wide,
+  d18O_T4M,
+  `proxy_AWS9 t2m precip ERA`
+)
+
+# T4M vs ECHAM6 t2m (proxy from ECHAM6 t2m + ECHAM6 accum)
+res_ech_t <- corr_test(
+  df_annual_wide,
+  d18O_T4M,
+  `proxy_ECHAM6 t2m`
+)
+
+# T4M vs ECHAM6 d18O (proxy from ECHAM6 δ18O + ECHAM6 accum)
+res_ech_o <- corr_test(
+  df_annual_wide,
+  d18O_T4M,
+  `proxy_ECHAM6 d18O`
+)
+
+cat(sprintf("T4M vs AWS:            r = %.3f, p = %.4g, n = %d\n",
+            res_aws$r, res_aws$p, res_aws$n))
+
+cat(sprintf("T4M vs ECHAM6 t2m:      r = %.3f, p = %.4g, n = %d\n",
+            res_ech_t$r, res_ech_t$p, res_ech_t$n))
+
+cat(sprintf("T4M vs ECHAM6 d18O:     r = %.3f, p = %.4g, n = %d\n",
+            res_ech_o$r, res_ech_o$p, res_ech_o$n))
