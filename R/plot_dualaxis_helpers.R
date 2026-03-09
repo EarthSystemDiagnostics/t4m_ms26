@@ -172,3 +172,62 @@ add_year_axis <- function(p, df_all, source_left, source_right,
   p
 }
 
+make_plot_annual_dualaxis <- function(df,
+                                      source_left,
+                                      source_right,
+                                      colors,
+                                      ylab_left,
+                                      ylab_right,
+                                      STARTYEAR = NULL) {
+  
+  library(dplyr)
+  library(ggplot2)
+  
+  dat <- df %>%
+    filter(source %in% c(source_left, source_right))
+  
+  if (!is.null(STARTYEAR)) {
+    dat <- dat %>% filter(year >= STARTYEAR)
+  }
+  
+  
+  left  <- dat %>% filter(source == source_left)
+  right <- dat %>% filter(source == source_right)
+  
+  
+  
+  m1 <- mean(left$d18O, na.rm = TRUE)
+  s1 <- sd(left$d18O, na.rm = TRUE)
+  m2 <- mean(right$proxy, na.rm = TRUE)
+  s2 <- sd(right$proxy, na.rm = TRUE)
+  
+  right <- right %>%
+    mutate(proxy_scaled = (proxy - m2) * (s1 / s2) + m1)
+  
+  
+  
+  ggplot() +
+    
+    geom_line(data = left,
+              aes(x = year, y = d18O, color = source_left),
+              linewidth = 1) +
+    
+    geom_line(data = right,
+              aes(x = year, y = proxy_scaled, color = source_right),
+              linewidth = 1) +
+    
+    scale_color_manual(values = colors) +
+    
+    
+    scale_y_continuous(
+      name = ylab_left,
+      sec.axis = sec_axis(~ (. - m1) / (s1 / s2) + m2, name = ylab_right)
+    ) +
+    
+    labs(x = NULL, color = NULL) +
+    
+    theme_minimal(base_size = 12) +
+    theme(
+      legend.position = "bottom"
+    )
+}
