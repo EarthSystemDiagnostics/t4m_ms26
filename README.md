@@ -4,6 +4,7 @@
 - Derived/intermediate: `data/interim/`
 - Analysis-ready: `data/processed/`
 - Reproducible scripts: `scripts/`
+- Functions that are used in multiple scripts: `R/`
 - Explorations: `experiments/`
 - Generated outputs: `output/`
 
