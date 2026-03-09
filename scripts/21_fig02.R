@@ -25,7 +25,6 @@ set_left_y_scale_inplace <- function(p, breaks, limits) {
   ys <- p$scales$get_scales("y")
   if (is.null(ys)) return(p)
   ys$breaks <- breaks
-  # ys$limits <- limits  # <- raus! sonst werden Daten gedroppt
   p + coord_cartesian(ylim = limits)
 }
 
