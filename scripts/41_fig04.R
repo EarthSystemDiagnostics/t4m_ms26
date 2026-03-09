@@ -11,7 +11,6 @@ dir.create(here::here("output", "figures"), recursive = TRUE, showWarnings = FAL
 # ----------------------------
 # settings
 # ----------------------------
-endDate   <- as.Date("2018-12-27")
 t2m_shift <- 10  # K (same increment as °C), visual offset for clarity
 
 # ----------------------------

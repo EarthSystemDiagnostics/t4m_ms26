@@ -1,12 +1,6 @@
 # scripts/22_fig03.R
 source(here::here("scripts", "01_load_inputs.R"))
 
-library(dplyr)
-library(lubridate)
-library(tidyr)
-library(ggplot2)
-library(patchwork)
-library(MethComp)
 
 dir.create(here::here("output", "figures"), recursive = TRUE, showWarnings = FALSE)
 
@@ -128,7 +122,7 @@ make_scatter_data <- function(df, x_name, y_name,
   points <- dat %>%
     rename(x = !!rlang::sym(x_name), y = !!rlang::sym(y_name))
   
-  # (bins not plotted, but keep minimal structure)
+ 
   list(points = points)
 }
 
@@ -237,6 +231,10 @@ corr_test <- function(df_wide, x_col, y_col) {
     n = nrow(dat)
   )
 }
+
+df_annual_wide <- df_annual %>%
+  select(source, year, d18O, proxy) %>%
+  pivot_wider(names_from = source, values_from = c(d18O, proxy))
 
 # T4M vs AWS (proxy from AWS t2m + reanalysis precip)
 res_aws <- corr_test(

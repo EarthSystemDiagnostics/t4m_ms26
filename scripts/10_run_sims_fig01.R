@@ -7,7 +7,7 @@ dir.create(here("output", "sims"), recursive = TRUE, showWarnings = FALSE)
 met.time <- aws$date
 idx      <- met.time <= endDate
 met.tp   <- aws$tp.era5
-met.proxy<- aws$t2m  # temperature in Fig1 (units preserved)
+met.proxy<- aws$t2m  
 
 # sim1: constant accumulation
 sim1 <- FirnR::SimProfile(

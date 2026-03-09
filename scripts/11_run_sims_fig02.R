@@ -7,7 +7,7 @@ library(zoo)
 
 dir.create(here::here("output", "sims"), recursive = TRUE, showWarnings = FALSE)
 
-# --- helper: simulate only (raw FirnR profile) ---
+# --- helper: simulate raw profile ---
 run_sim <- function(met.time, met.tp, met.signal, source,
                     diffuse = TRUE, rho.surface = 330, dz.out = 1/1000) {
   
@@ -37,14 +37,14 @@ date_bin <- function(sim, source) {
   out
 }
 
-# --- special: ERA5 tp mapped onto ECHAM6 time axis ---
+# --- ERA5 tp mapped onto ECHAM6 time axis ---
 era5_tp_on_echam6 <- left_join(
   echam6 %>% select(date),
   era5  %>% select(date, tp),
   by = "date"
 )$tp
 
-# --- 1) run all RAW simulations ---
+# --- 1) run all raw simulations ---
 sims_raw <- list(
   era5 = run_sim(
     met.time   = era5$date,
@@ -111,12 +111,12 @@ sims_raw <- list(
   )
 )
 
-# --- 2) create dated+binned versions (as before) ---
+# --- 2) create dated+binned versions  ---
 sims_binned <- bind_rows(lapply(names(sims_raw), function(nm) {
   date_bin(sims_raw[[nm]], source = sims_raw[[nm]]$source[1])
 }))
 
-# --- 3) combine trench data with binned sims (Fig02) ---
+# --- 3) combine trench data with binned sims  ---
 df_all <- bind_rows(
   t4m_dated,
   sims_binned
@@ -125,5 +125,6 @@ df_all <- bind_rows(
 # --- save both products ---
 saveRDS(df_all,      here::here("output", "sims", "fig02_df_all.rds"))
 saveRDS(sims_raw,    here::here("output", "sims", "fig02_sims_raw.rds"))
+
 # optional: auch binned separat
 saveRDS(sims_binned, here::here("output", "sims", "fig02_sims_binned.rds"))
