@@ -9,28 +9,38 @@ idx      <- met.time <= endDate
 met.tp   <- aws$tp.era5
 met.proxy<- aws$t2m  
 
-# sim1: constant accumulation
+# sim1: constant accumulation 3cm binning
 sim1 <- FirnR::SimProfile(
   time        = met.time[idx],
   precip      = rep(mean(met.tp[idx]), sum(idx)),
   temperature = met.proxy[idx],
   diffuse     = FALSE,
   rho.surface = rho.surface,
-  dz.out      = 1/1000
+  dz.out      = 3/100
 ) |> RenameFirnRSignal()
 
-# sim2: variable accumulation (no diffusion)
+# sim2: variable accumulation (no diffusion), 3cm binning
 sim2 <- FirnR::SimProfile(
   time        = met.time[idx],
   precip      = met.tp[idx],
   temperature = met.proxy[idx],
   diffuse     = FALSE,
   rho.surface = rho.surface,
-  dz.out      = 1/1000
+  dz.out      = 3/100
 ) |> RenameFirnRSignal()
 
-# sim3: variable accumulation + diffusion
+# sim3: variable accumulation + diffusion, 3cm binning
 sim3 <- FirnR::SimProfile(
+  time        = met.time[idx],
+  precip      = met.tp[idx],
+  temperature = met.proxy[idx],
+  diffuse     = TRUE,
+  rho.surface = rho.surface,
+  dz.out      = 3/100
+) |> RenameFirnRSignal()
+
+# sim4: variable accumulation + diffusion, 1mm resolution 
+sim4 <- FirnR::SimProfile(
   time        = met.time[idx],
   precip      = met.tp[idx],
   temperature = met.proxy[idx],
@@ -39,9 +49,9 @@ sim3 <- FirnR::SimProfile(
   dz.out      = 1/1000
 ) |> RenameFirnRSignal()
 
-# sim4: sim3 dated + binned to T4M resolution
-sim3_dated <- DateSimByAgeModel(sim3, agemodel)
-sim4 <- BinDatedSimToT4M(sim3_dated, t4m, value_col = "signal")
+# sim4: sim4 dated + binned to T4M resolution
+sim4_dated <- DateSimByAgeModel(sim4, agemodel)
+sim4 <- BinDatedSimToT4M(sim4_dated, t4m, value_col = "signal")
 
 saveRDS(
   list(sim1 = sim1, sim2 = sim2, sim3 = sim3, sim4 = sim4),
