@@ -39,21 +39,7 @@ sim3 <- FirnR::SimProfile(
   dz.out      = 3/100
 ) |> RenameFirnRSignal()
 
-# sim4: variable accumulation + diffusion, 1mm resolution 
-sim4 <- FirnR::SimProfile(
-  time        = met.time[idx],
-  precip      = met.tp[idx],
-  temperature = met.proxy[idx],
-  diffuse     = TRUE,
-  rho.surface = rho.surface,
-  dz.out      = 1/1000
-) |> RenameFirnRSignal()
-
-# sim4: sim4 dated + binned to T4M resolution
-sim4_dated <- DateSimByAgeModel(sim4, agemodel)
-sim4 <- BinDatedSimToT4M(sim4_dated, t4m, value_col = "signal")
-
 saveRDS(
-  list(sim1 = sim1, sim2 = sim2, sim3 = sim3, sim4 = sim4),
+  list(sim1 = sim1, sim2 = sim2, sim3 = sim3),
   here("output", "sims", "fig01_sims.rds")
 )

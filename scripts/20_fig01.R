@@ -31,27 +31,21 @@ df_fig2 <- readRDS(here::here("output", "sims", "fig02_df_all.rds"))
 sim1 <- sims$sim1
 sim2 <- sims$sim2
 sim3 <- sims$sim3
-sim4 <- sims$sim4
+
 
 df_all <- bind_rows(
   sim1 %>% transmute(depth, value = signal, series = "constant accumulation", lw = 0.3),
   sim2 %>% transmute(depth, value = signal, series = "variable accumulation",  lw = 0.3),
-  sim3 %>% transmute(depth, value = signal, series = "+ diffusion",            lw = 0.9),
-  sim4 %>% transmute(depth, value = proxy,  series = "+ dating + binning",     lw = 0.9)
+  sim3 %>% transmute(depth, value = signal, series = "+ diffusion",            lw = 0.9)
 ) %>%
   mutate(series = factor(series, levels = c(
-    "constant accumulation", "variable accumulation", "+ diffusion", "+ dating + binning"
+    "constant accumulation", "variable accumulation", "+ diffusion"
   )))
 
 
 
 
-# ---- inputs ----
-# sims: list(sim1, sim2, sim3, sim4) must exist, e.g. loaded from your sim script / RDS
-# Example if you saved them:
-# sims_raw <- readRDS(here::here("output", "sims", "fig02_sims_raw.rds"))
-# ...but your sim1..sim4 seem to come from a different object; adjust if needed.
-
+#For the last panel, we need T4M 
 df_fig2 <- readRDS(here::here("output", "sims", "fig02_df_all.rds"))
 
 
@@ -84,12 +78,8 @@ p1 <- panel_sim(sim1, "constant accumulation", lw = 0.9)
 p2 <- panel_sim(sim2, "variable accumulation",  lw = 0.9)
 p3 <- panel_sim(sim3, "+ diffusion",            lw = 0.9)
 
-# ---- bottom panel: EXACTLY like Fig2 (top panel), but without year axis if you want ----
+# ---- bottom panel: as Fig2 (top panel) ----
 df_bottom <- df_fig2 %>% filter(source %in% c("T4M", "AWS9 t2m precip ERA"))
-
-
-
-
 
 
 # ---- bottom panel data ----
