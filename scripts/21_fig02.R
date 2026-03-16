@@ -16,9 +16,9 @@ ylab_left <- expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
 
 colors <- c(
   "T4M"                 = "black",
-  "AWS9 t2m precip ERA" = "red",
-  "ECHAM6 t2m"          = "firebrick",
-  "ECHAM6 d18O"         = "steelblue"
+  "AWS9 t2m precip ERA" = "steelblue",
+  "ECHAM6 t2m"          = "red",
+  "ECHAM6 d18O"         = "firebrick"
 )
 
 set_left_y_scale_inplace <- function(p, breaks, limits) {

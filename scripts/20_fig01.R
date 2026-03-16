@@ -54,12 +54,15 @@ df_all <- bind_rows(
 
 df_fig2 <- readRDS(here::here("output", "sims", "fig02_df_all.rds"))
 
+
+
 colors <- c(
   "T4M"                 = "black",
-  "AWS9 t2m precip ERA" = "red",
-  "ECHAM6 t2m"          = "firebrick",
-  "ECHAM6 d18O"         = "steelblue"
+  "AWS9 t2m precip ERA" = "steelblue",
+  "ECHAM6 t2m"          = "red",
+  "ECHAM6 d18O"         = "firebrick"
 )
+
 
 # y label like in Fig2 (with a bit more space + (‰))
 ylab_left <- expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
@@ -67,7 +70,7 @@ ylab_left <- expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
 # ---- helper: simple single-series panel for sim1..sim3 ----
 panel_sim <- function(sim, title, lw = 0.3, ylab = "Temperature (K)") {
   ggplot(sim, aes(x = depth, y = signal)) +
-    geom_line(linewidth = lw,col=colors[2]) +
+    geom_line(linewidth = lw,col=colors[["AWS9 t2m precip ERA"]]) +
     labs(x = NULL, y = ylab, title = title) +
     theme_minimal(base_size = 12) +
     theme(
@@ -77,8 +80,8 @@ panel_sim <- function(sim, title, lw = 0.3, ylab = "Temperature (K)") {
 }
 
 # ---- top 3 panels (raw sim signal) ----
-p1 <- panel_sim(sim1, "constant accumulation", lw = 0.3)
-p2 <- panel_sim(sim2, "variable accumulation",  lw = 0.3)
+p1 <- panel_sim(sim1, "constant accumulation", lw = 0.9)
+p2 <- panel_sim(sim2, "variable accumulation",  lw = 0.9)
 p3 <- panel_sim(sim3, "+ diffusion",            lw = 0.9)
 
 # ---- bottom panel: EXACTLY like Fig2 (top panel), but without year axis if you want ----
@@ -87,11 +90,7 @@ df_bottom <- df_fig2 %>% filter(source %in% c("T4M", "AWS9 t2m precip ERA"))
 
 
 
-# --- Farben: alles rot (Simulation), T4M schwarz ---
-cols_bottom <- c(
-  "sim" = "red",
-  "t4m" = "black"
-)
+
 
 # ---- bottom panel data ----
 df_t4m <- df_fig2 %>% filter(source == "T4M") %>% select(depth, d18O)
@@ -107,27 +106,27 @@ df_t4m_plot <- df_t4m %>%
 
 p4 <- ggplot() +
   geom_line(data = df_sim,
-            aes(x = depth, y = proxy, colour = "sim"),
+            aes(x = depth, y = proxy, colour = "AWS9 t2m precip ERA"),
             linewidth = 0.9) +
   geom_line(data = df_t4m_plot,
-            aes(x = depth, y = d18O_on_sim, colour = "t4m"),
+            aes(x = depth, y = d18O_on_sim, colour = "T4M"),
             linewidth = 0.9) +
-  scale_colour_manual(values = cols_bottom, breaks = c("sim","t4m"), labels = c("AWS sim", "T4M")) +
+  scale_colour_manual(values = colors, breaks = c("AWS9 t2m precip ERA","T4M"), labels = c("AWS sim", "T4M")) +
   scale_y_continuous(
     name = "based on AWS t2m (°C)",
     sec.axis = sec_axis(~ (. - m_sim) / (s_sim / s_t4m) + m_t4m,
                         name = expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")"))
   ) +
-  labs(x = "Depth (cm)", colour = "", title = "+ dating + binning (AWS sim + T4M)") +
+  labs(x = "Snow depth (m)", colour = "", title = "+ dating + binning (AWS sim + T4M)") +
   theme_minimal(base_size = 12) +
   theme(
     plot.title = element_text(face = "bold"),
     panel.grid.minor = element_blank(),
     legend.position = "none",
-    axis.title.y      = element_text(color = cols_bottom[["sim"]]),
-    axis.text.y       = element_text(color = cols_bottom[["sim"]]),
-    axis.title.y.right= element_text(color = cols_bottom[["t4m"]]),
-    axis.text.y.right = element_text(color = cols_bottom[["t4m"]])
+    axis.title.y      = element_text(color = colors[["AWS9 t2m precip ERA"]]),
+    axis.text.y       = element_text(color = colors[["AWS9 t2m precip ERA"]]),
+    axis.title.y.right= element_text(color = colors[["T4M"]]),
+    axis.text.y.right = element_text(color = colors[["T4M"]])
   )
 
 
