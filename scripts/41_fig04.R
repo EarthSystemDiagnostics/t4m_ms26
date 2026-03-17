@@ -8,10 +8,13 @@ library(zoo)
 
 dir.create(here::here("output", "figures"), recursive = TRUE, showWarnings = FALSE)
 
-# ----------------------------
-# settings
-# ----------------------------
-t2m_shift <- 10  # K (same increment as °C), visual offset for clarity
+t2m_shift <- 10  # Shift for visual purposes
+
+colors <- c(
+  "Diffused precip.-weighted T" = "steelblue",
+  "Annual mean t2m"             = "darkorange3",
+  "T4M (scaled)"                = "black"
+)
 
 # ----------------------------
 # load data
@@ -19,9 +22,6 @@ t2m_shift <- 10  # K (same increment as °C), visual offset for clarity
 sims_raw <- readRDS(here::here("output", "sims", "fig02_sims_raw.rds"))
 df_all   <- readRDS(here::here("output", "sims", "fig02_df_all.rds"))
 
-# ----------------------------
-# annual means (full years shown)
-# ----------------------------
 
 # simulated diffused precip.-weighted T (°C)
 sim_era5 <- sims_raw$era5 %>%
@@ -39,14 +39,14 @@ ann_t2m <- era5 %>%
   group_by(year) %>%
   summarise(t2m = mean(t2m, na.rm = TRUE), .groups = "drop")
 
-# T4M annual mean d18O (‰) from df_all (only where available)
+# T4M annual mean d18O (‰) from df_all
 ann_t4m <- df_all %>%
   filter(source == "T4M") %>%
   mutate(year = year(date)) %>%
   group_by(year) %>%
   summarise(t4m_d18O = mean(d18O, na.rm = TRUE), .groups = "drop")
 
-# base df: all years from simulation/ERA5 (show full time range)
+# base df: all years from simulation/ERA5 
 df <- ann_sim %>%
   full_join(ann_t2m, by = "year") %>%
   full_join(ann_t4m, by = "year") %>%
@@ -89,39 +89,49 @@ df <- df %>%
   )
 
 # ----------------------------
-# plot (dual axis with identical scaling; ERA5 shifted by +10 K)
+# plot (dual axis with identical scaling; ERA5 shifted by t2mshift value)
 # ----------------------------
 p <- ggplot(df, aes(x = year)) +
   
-  # annual means (thin)
-  geom_line(aes(y = signal, color = "Diffused precip.-weighted T (annual)"), linewidth = 0.7) +
-  geom_line(aes(y = t2m + t2m_shift, color = "ERA5 t2m (annual)"), linewidth = 0.7) +
-  geom_line(aes(y = t4m_scaled, color = "T4M (scaled; annual)"), linewidth = 0.7) +
-  
-  # 5-year means (thick)
-#  geom_line(aes(y = signal_5y, color = "Diffused precip.-weighted T (5-year)"), linewidth = 1.2) +
-#  geom_line(aes(y = t2m_5y + t2m_shift, color = "ERA5 t2m (5-year)"), linewidth = 1.2) +
-#  geom_line(aes(y = t4m_scaled_5y, color = "T4M (scaled; 5-year)"), linewidth = 1.2) +
+  geom_line(aes(y = signal, color = "Diffused precip.-weighted T"), linewidth = 0.9) +
+  geom_line(aes(y = t2m + t2m_shift, color = "Annual mean t2m"), linewidth = 0.9) +
+  geom_line(aes(y = t4m_scaled, color = "T4M (scaled)"), linewidth = 0.9) +
   
   scale_y_continuous(
-    name = "Diffused precipitation-weighted T (°C)",
-    sec.axis = sec_axis(~ . - t2m_shift, name = "ERA5 annual mean t2m (°C)")
+    name = "Diffused precip.-weighted t2m (°C)",
+    sec.axis = sec_axis(~ . - t2m_shift, name = "Annual mean t2m (°C)")
   ) +
   
-  theme_minimal(base_size = 13) +
-  labs(x = "Year", color = NULL) +
-  theme(legend.position = "top")
+  scale_color_manual(values = colors) +
+  labs(x = "Year", color = "") +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.minor = element_blank(),
+    legend.position  = "top",
+    legend.title     = element_blank(),
+    axis.title.y.left  = element_text(color = colors["Diffused precip.-weighted T"]),
+    axis.text.y.left   = element_text(color = colors["Diffused precip.-weighted T"]),
+    axis.title.y.right = element_text(color = colors["Annual mean t2m"]),
+    axis.text.y.right  = element_text(color = colors["Annual mean t2m"]),
+    axis.ticks.y.left  = element_line(color = colors["Diffused precip.-weighted T"]),
+    axis.ticks.y.right = element_line(color = colors["Annual mean t2m"])
+  )
+ggsave(
+  here::here("output", "figures", "Figure4left.pdf"),
+  p, width = 5, height = 3, units = "in",
+  device = cairo_pdf
+)
 
 ggsave(
-  here::here("output", "figures", "Figure4.pdf"),
-  p, width = 7.2, height = 3.9, units = "in"
+  here::here("output", "figures", "Figure4left.svg"),
+  p, width = 5, height = 3, units = "in"
 )
 
 # ----------------------------
 # correlations (raw and detrended)
 # ----------------------------
 
-# helper: detrend by year (returns residuals)
+# detrend by year 
 detrend <- function(y, year) {
   resid(lm(y ~ year))
 }
@@ -150,28 +160,6 @@ message("  Annual (detrended):  ", round(cor_ann_det, 3))
 message("  5-year (raw):        ", round(cor_5y_raw, 3))
 message("  5-year (detrended):  ", round(cor_5y_det, 3))
 
-# optional: also report T4M vs signal (raw & detrended), where available
-t4m_common <- df %>%
-  filter(!is.na(t4m_scaled), !is.na(signal))
-
-if (nrow(t4m_common) > 3) {
-  cor_t4m_raw <- cor(t4m_common$t4m_scaled, t4m_common$signal, use = "complete.obs")
-  cor_t4m_det <- cor(detrend(t4m_common$t4m_scaled, t4m_common$year),
-                     detrend(t4m_common$signal,     t4m_common$year),
-                     use = "complete.obs")
-  
-  message("Correlation (T4M scaled vs signal):")
-  message("  Annual (raw):        ", round(cor_t4m_raw, 3))
-  message("  Annual (detrended):  ", round(cor_t4m_det, 3))
-}
-
-# optional diagnostics (console)
-message("T4M scaling fitted on overlapping years only:")
-message("  overlap years: ", min(overlap$year), "–", max(overlap$year),
-        " (n=", nrow(overlap), ")")
-message("  mu(signal) = ", round(mu_sig, 3), ", sd(signal) = ", round(sd_sig, 3))
-message("  mu(T4M)    = ", round(mu_t4m, 3), ", sd(T4M)    = ", round(sd_t4m, 3))
-
 
 
 
@@ -184,61 +172,26 @@ b_ann <- mean(sc_ann$signal, na.rm = TRUE) -
   mean(sc_ann$t2m,    na.rm = TRUE)
 
 p_sc_ann <- ggplot(sc_ann, aes(x = t2m, y = signal)) +
+  theme_minimal(base_size = 12) +
   geom_point() +
   geom_abline(slope = 1, intercept = b_ann, linetype = "dashed") +
   geom_smooth(method = "lm", se = FALSE) +
   coord_equal() +
   theme_minimal(base_size = 13) +
   labs(
-    x = "ERA5 annual mean t2m (°C)",
-    y = "Diffused precipitation-weighted T (°C)",
-    title = "Annual: simulated signal vs ERA5 t2m"
+    x = "Annual mean t2m (°C)",
+    y = "Diffused precip.-weighted t2m (°C)",
+    title = ""
   )
 
-ggsave(
-  here::here("output", "figures", "Figure4_scatter_annual.pdf"),
-  p_sc_ann, width = 5.6, height = 4.6, units = "in"
-)
-
-# ---- 2) 5-year NON-overlapping means ----
-# define 5y blocks based on first available year in common data
-miny <- min(sc_ann$year, na.rm = TRUE)
-
-sc_5y_nonoverlap <- sc_ann %>%
-  mutate(block_start = miny + 5 * ((year - miny) %/% 5)) %>%
-  group_by(block_start) %>%
-  summarise(
-    year_mid = block_start + 2,  # just for labeling if needed
-    signal_5y = mean(signal, na.rm = TRUE),
-    t2m_5y    = mean(t2m, na.rm = TRUE),
-    n_years   = n(),
-    .groups = "drop"
-  ) %>%
-  # keep only complete 5-year blocks (optional but usually desired)
-  filter(n_years == 5)
-
-b_5y <- mean(sc_5y_nonoverlap$signal_5y, na.rm = TRUE) -
-  mean(sc_5y_nonoverlap$t2m_5y,    na.rm = TRUE)
-
-p_sc_5y <- ggplot(sc_5y_nonoverlap, aes(x = t2m_5y, y = signal_5y)) +
-  geom_point() +
-  geom_abline(slope = 1, intercept = b_5y, linetype = "dashed") +
-  geom_smooth(method = "lm", se = FALSE) +
-  coord_equal() +
-  theme_minimal(base_size = 13) +
-  labs(
-    x = "ERA5 5-year mean t2m (°C) (non-overlapping)",
-    y = "Diffused precipitation-weighted T (°C) (non-overlapping)",
-    title = "5-year non-overlapping: simulated signal vs ERA5 t2m"
-  )
 
 ggsave(
-  here::here("output", "figures", "Figure4_scatter_5y_nonoverlap.pdf"),
-  p_sc_5y, width = 5.6, height = 4.6, units = "in"
+  here::here("output", "figures", "Figure4_right.pdf"),
+  p_sc_ann, width = 3, height = 3.5, units = "in",
+  device = cairo_pdf
 )
 
-# optional: print correlations for these scatter datasets
-message("Scatter correlations:")
-message("  Annual (raw): ", round(cor(sc_ann$signal, sc_ann$t2m, use = "complete.obs"), 3))
-message("  5y non-overlap (raw): ",
-        round(cor(sc_5y_nonoverlap$signal_5y, sc_5y_nonoverlap$t2m_5y, use = "complete.obs"), 3))
+ggsave(
+  here::here("output", "figures", "Figure4_right.svg"),
+  p_sc_ann, width = 3, height = 3.5, units = "in"
+)
