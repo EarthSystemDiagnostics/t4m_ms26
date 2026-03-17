@@ -63,7 +63,7 @@ g.echamd18O <- make_plot_dualaxis(
   source_right = "ECHAM6 d18O",
   colors = colors,
   ylab_left  = ylab_left,
-  ylab_right <- expression("based on ECHAM6" ~~ delta^{18}*O ~ "(" * "\u2030" * ")"),
+  ylab_right = expression("based on ECHAM6" ~~ delta^{18}*O ~ "(" * "\u2030" * ")"),
   year_ticks = year_ticks,
   show_year_labels = FALSE
 )
@@ -81,20 +81,37 @@ g.aws <- add_year_axis(
   label_years = TRUE,
   y_limits = y_left_limits
 )
-  
-# stack + shared legend
-ga <- g.aws + theme(axis.title.x = element_blank(),
-                    axis.text.x  = element_blank(),
-                    plot.margin  = margin(5.5, 12, 0, 5.5))
-gt <- g.echamT + theme(axis.title.x = element_blank(),
-                       axis.text.x  = element_blank(),
-                       plot.margin  = margin(0,   12, 0, 5.5))
-go <- g.echamd18O + theme(plot.margin = margin(0, 12, 5.5, 5.5))
+ga <- g.aws + 
+  labs(tag = "a") +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x  = element_blank(),
+    plot.margin  = margin(5.5, 12, 0, 5.5)
+  )
+
+gt <- g.echamT + 
+  labs(tag = "b") +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x  = element_blank(),
+    plot.margin  = margin(0, 12, 0, 5.5)
+  )
+
+go <- g.echamd18O + 
+  labs(tag = "c") +
+  theme(
+    plot.margin = margin(0, 12, 5.5, 5.5)
+  )
 
 p <- (ga / gt / go) +
   plot_layout(ncol = 1, axes = "collect", guides = "collect") &
-  theme(legend.position = "bottom") &
-  theme(legend.position = "none")
+  theme(
+    legend.position   = "none",
+    plot.tag          = element_text(size = 11, face = "plain"),
+    plot.tag.position = c(0.01, 0.98)
+  )
+
+
 
 ggsave(
   here::here("output", "figures", "Figure2.pdf"),

@@ -27,6 +27,9 @@ sims <- readRDS(here("output", "sims", "fig01_sims.rds"))
 
 df_fig2 <- readRDS(here::here("output", "sims", "fig02_df_all.rds"))
 
+aws_ylim <- range(sim1$signal, na.rm = TRUE)
+pad <- diff(aws_ylim) * 0.09
+aws_ylim <- aws_ylim + c(-pad, pad)
 
 sim1 <- sims$sim1
 sim2 <- sims$sim2
@@ -60,16 +63,20 @@ colors <- c(
 
 # y label like in Fig2 (with a bit more space + (‰))
 ylab_left <- expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
-
-# ---- helper: simple single-series panel for sim1..sim3 ----
-panel_sim <- function(sim, title, lw = 0.3, ylab = "Temperature (K)") {
+panel_sim <- function(sim, title, lw = 0.3,
+                      ylab = "based on AWS t2m (°C)",
+                      y_limits = aws_ylim) {
   ggplot(sim, aes(x = depth, y = signal)) +
-    geom_line(linewidth = lw,col=colors[["AWS9 t2m precip ERA"]]) +
+    geom_line(linewidth = lw, col = colors[["AWS9 t2m precip ERA"]]) +
+    coord_cartesian(ylim = y_limits) +
     labs(x = NULL, y = ylab, title = title) +
     theme_minimal(base_size = 12) +
     theme(
-      plot.title = element_text(face = "bold"),
-      panel.grid.minor = element_blank()
+      plot.title = element_text(face = "plain",size=9),
+      panel.grid.minor = element_blank(),
+      axis.title.y = element_text(color = colors[["AWS9 t2m precip ERA"]]),
+      axis.text.y  = element_text(color = colors[["AWS9 t2m precip ERA"]]),
+      axis.ticks.y = element_line(color = colors[["AWS9 t2m precip ERA"]])
     )
 }
 
@@ -107,10 +114,11 @@ p4 <- ggplot() +
     sec.axis = sec_axis(~ (. - m_sim) / (s_sim / s_t4m) + m_t4m,
                         name = expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")"))
   ) +
-  labs(x = "Snow depth (m)", colour = "", title = "+ dating + binning (AWS sim + T4M)") +
+  coord_cartesian(ylim = aws_ylim) +  
+  labs(x = "Snow depth (m)", colour = "", title = "+ dating") +
   theme_minimal(base_size = 12) +
   theme(
-    plot.title = element_text(face = "bold"),
+    plot.title = element_text(face = "plain",size=9),
     panel.grid.minor = element_blank(),
     legend.position = "none",
     axis.title.y      = element_text(color = colors[["AWS9 t2m precip ERA"]]),
@@ -119,20 +127,54 @@ p4 <- ggplot() +
     axis.text.y.right = element_text(color = colors[["T4M"]])
   )
 
-
 # ---- align x axis label only on bottom plot ----
-p1 <- p1 + theme(axis.title.x = element_blank(), axis.text.x = element_blank())
-p2 <- p2 + theme(axis.title.x = element_blank(), axis.text.x = element_blank())
-p3 <- p3 + theme(axis.title.x = element_blank(), axis.text.x = element_blank())
+p1 <- p1 + theme(
+  axis.title.x = element_blank(),
+  axis.text.x  = element_blank(),
+  plot.margin  = margin(1, 5.5, 0, 5.5)
+)
+
+p2 <- p2 + theme(
+  axis.title.x = element_blank(),
+  axis.text.x  = element_blank(),
+  plot.margin  = margin(0, 5.5, 0, 5.5)
+)
+
+p3 <- p3 + theme(
+  axis.title.x = element_blank(),
+  axis.text.x  = element_blank(),
+  plot.margin  = margin(0, 5.5, 0, 5.5)
+)
+
+p4 <- p4 + theme(
+  plot.margin = margin(0, 5.5, 1, 5.5)
+)
+p1 <- p1 + labs(y = NULL)
+p2 <- p2 + labs(y = "based on AWS t2m (°C)")
+p3 <- p3 + labs(y = NULL)
+
+p4 <- p4 +
+  scale_y_continuous(
+    name = NULL,
+    sec.axis = sec_axis(
+      ~ (. - m_sim) / (s_sim / s_t4m) + m_t4m,
+      name = expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
+    )
+  )
 
 # ---- assemble ----
 p_fig1 <- (p1 / p2 / p3 / p4) +
-  plot_layout(ncol = 1, heights = c(1, 1, 1, 1.35))
+  plot_layout(ncol = 1, heights = c(1, 1, 1, 1.35)) +
+  plot_annotation(tag_levels = list(c("b", "c", "d", "e"))) &
+  theme(
+    plot.tag = element_text(size = 11),
+    plot.tag.position = c(0.01, 0.98)
+  )
 
 ggsave(here::here("output", "figures", "Figure1.pdf"),
-       p_fig1, width = 6.5, height = 9.0, units = "in", device = cairo_pdf)
+       p_fig1, width = 4.5, height = 7.0, units = "in", device = cairo_pdf)
 
 ggsave(here::here("output", "figures", "Figure1.svg"),
-       p_fig1, width = 6.5, height = 9.0, units = "in")
+       p_fig1, width = 4.5, height = 7.0, units = "in")
 
 

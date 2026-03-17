@@ -1,7 +1,14 @@
 # scripts/22_fig03.R
 source(here::here("scripts", "01_load_inputs.R"))
 
-set.seed(200) #For the MC intervals
+set.seed(200) # For the MC intervals
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+library(patchwork)
+library(MethComp)
 
 dir.create(here::here("output", "figures"), recursive = TRUE, showWarnings = FALSE)
 
@@ -21,9 +28,11 @@ df_annual <- df_all %>%
   filter(!is.na(year), year < 2019)
 
 # ============================================================
-# Figure 3A: Annual dual-axis panels (T4M vs AWS / ECHAM T / ECHAM d18O)
+# Figure 3A: annual dual-axis panels
+# Keep only:
+#   - T4M vs AWS
+#   - T4M vs ECHAM6 d18O
 # ============================================================
-
 
 colors <- c(
   "T4M"                 = "black",
@@ -32,7 +41,8 @@ colors <- c(
   "ECHAM6 d18O"         = "firebrick"
 )
 
-ylab_left <- expression("T4M" * delta^{18} * O ~ "\u2030")
+ylab_left <- expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
+
 
 g.aws.annual <- make_plot_annual_dualaxis(
   df_annual,
@@ -44,79 +54,63 @@ g.aws.annual <- make_plot_annual_dualaxis(
   STARTYEAR    = 1998
 )
 
-g.echamT.annual <- make_plot_annual_dualaxis(
-  df_annual,
-  source_left  = "T4M",
-  source_right = "ECHAM6 t2m",
-  colors       = colors,
-  ylab_left    = ylab_left,
-  ylab_right   = "based on ECHAM6 t2m (°C)",
-  STARTYEAR    = 1998
-)
-
 g.echamd18O.annual <- make_plot_annual_dualaxis(
   df_annual,
   source_left  = "T4M",
   source_right = "ECHAM6 d18O",
   colors       = colors,
   ylab_left    = ylab_left,
-  ylab_right   = expression("based on ECHAM6 " * delta^{18} * O ~ "\u2030"),
+  ylab_right   = expression("based on ECHAM6 " * delta^{18} * O ~ "(" * "\u2030" * ")"),
   STARTYEAR    = 1998
 )
 
-ga <- g.aws.annual + theme(
-  axis.title.x = element_blank(),
-  axis.text.x  = element_blank(),
-  plot.margin  = margin(5.5, 12, 0, 5.5)
-)
-gt <- g.echamT.annual + theme(
-  axis.title.x = element_blank(),
-  axis.text.x  = element_blank(),
-  plot.margin  = margin(0, 12, 0, 5.5)
-)
-go <- g.echamd18O.annual + theme(
-  plot.margin = margin(0, 12, 5.5, 5.5)
-)
+ga <- g.aws.annual +
+  labs(tag = "a") +
+  theme(legend.position = "none") +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x  = element_blank(),
+    plot.margin  = margin(5.5, 12, 0, 5.5),
+    axis.title.y.left  = element_text(color = colors["T4M"]),
+    axis.text.y.left   = element_text(color = colors["T4M"]),
+    axis.ticks.y.left  = element_line(color = colors["T4M"]),
+    axis.title.y.right = element_text(color = colors["AWS9 t2m precip ERA"]),
+    axis.text.y.right  = element_text(color = colors["AWS9 t2m precip ERA"]),
+    axis.ticks.y.right = element_line(color = colors["AWS9 t2m precip ERA"])
+  )
 
-p_annual <- (ga / go) +
+go <- g.echamd18O.annual +
+  labs(tag = "b") +
+  theme(legend.position = "none") +
+  theme(
+    plot.margin = margin(0, 12, 5.5, 5.5),
+    axis.title.y.left  = element_text(color = colors["T4M"]),
+    axis.text.y.left   = element_text(color = colors["T4M"]),
+    axis.ticks.y.left  = element_line(color = colors["T4M"]),
+    axis.title.y.right = element_text(color = colors["ECHAM6 d18O"]),
+    axis.text.y.right  = element_text(color = colors["ECHAM6 d18O"]),
+    axis.ticks.y.right = element_line(color = colors["ECHAM6 d18O"])
+  )
+
+
+p_left <- (ga / go) +
   plot_layout(ncol = 1, axes = "collect", guides = "collect") &
   theme(legend.position = "bottom")
 
-ggsave(
-  here::here("output", "figures", "Figure3_left.pdf"),
-  p_annual, width = 3.25, height = 6.5, units = "in",
-  device = cairo_pdf
-)
-
-ggsave(
-  here::here("output", "figures", "Figure3_left.svg"),
-  p_annual, width = 3.25, height = 6.5, units = "in"
-)
-
-
 # ============================================================
-# Figure 3B/C: Scatter (annual) with Deming regression
-# Only keep:
-#   - T4M vs AWS (annual)
-#   - T4M vs ECHAM6 d18O (annual)
+# Figure 3B/C: scatter (annual)
 # ============================================================
 
+ylab_t4m <- expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
 
-ylab_t4m <- expression(T4M~delta^{18}*O~"\u2030")
-
-
-xlab_echam_d18O <- expression("based on ECHAM6 " * delta^{18} * O ~ "\u2030")
-
-
+xlab_echam_d18O <- expression("based on ECHAM6 " * delta^{18} * O ~ "(" * "\u2030" * ")")
 xlab_aws <- "based on AWS t2m (°C)"
-
 
 # Deming scatter expects a "depth" column -> reuse year as depth
 df_annual2 <- df_annual %>% rename(depth = year)
 
 make_scatter_data <- function(df, x_name, y_name,
-                              x_var = "d18O", y_var = "proxy",
-                              bin_size = 1) {
+                              x_var = "d18O", y_var = "proxy") {
   
   dat <- df %>%
     filter(source %in% c(x_name, y_name)) %>%
@@ -131,9 +125,9 @@ make_scatter_data <- function(df, x_name, y_name,
   points <- dat %>%
     rename(x = !!rlang::sym(x_name), y = !!rlang::sym(y_name))
   
- 
   list(points = points)
 }
+
 plot_scatter_deming <- function(sc, xlab, ylab, vr = 1,
                                 conf_level = 0.90, n_boot = 10000, col = "red",
                                 expand_frac = -0.2) {
@@ -171,7 +165,6 @@ plot_scatter_deming <- function(sc, xlab, ylab, vr = 1,
     ymax = apply(pred_y, 1, quantile, probs = 1 - alpha_half, na.rm = TRUE)
   )
   
-  # gemeinsame Spannweite für x und y
   x_rng <- range(sc$points$x, pred_df$x, na.rm = TRUE)
   y_rng <- range(sc$points$y, pred_df$y, pred_df$ymin, pred_df$ymax, na.rm = TRUE)
   
@@ -185,14 +178,22 @@ plot_scatter_deming <- function(sc, xlab, ylab, vr = 1,
   y_lim <- c(y_mid - span / 2 - pad, y_mid + span / 2 + pad)
   
   ggplot() +
+    theme_minimal(base_size = 12) +
     geom_point(data = sc$points, aes(x = x, y = y), alpha = 1, size = 2) +
-    geom_ribbon(data = pred_df, aes(x = x, ymin = ymin, ymax = ymax),
-                fill = col, alpha = 0.15) +
-    geom_line(data = pred_df, aes(x = x, y = y),
-              color = col, linewidth = 1) +
+    geom_ribbon(
+      data = pred_df,
+      aes(x = x, ymin = ymin, ymax = ymax),
+      fill = col, alpha = 0.15
+    ) +
+    geom_line(
+      data = pred_df,
+      aes(x = x, y = y),
+      color = col, linewidth = 1
+    ) +
     labs(x = xlab, y = ylab) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
-    theme_minimal(base_size = 12)
+    theme_minimal(base_size = 12) +
+    theme(panel.grid.minor = element_blank())
 }
 
 # --- T4M vs AWS (annual) ---
@@ -210,19 +211,9 @@ p_sc_aws <- plot_scatter_deming(
   xlab = xlab_aws,
   vr   = 1,
   col  = colors[["AWS9 t2m precip ERA"]]
-)
-
-
-ggsave(
-  here::here("output", "figures", "Figure3_scatter_T4M_vs_AWS_annual.pdf"),
-  p_sc_aws, width = 3, height = 3, units = "in",
-  device = cairo_pdf
-)
-ggsave(
-  here::here("output", "figures", "Figure3_scatter_T4M_vs_AWS_annual.svg"),
-  p_sc_aws, width = 3, height = 3, units = "in",
-)
-
+) +
+  labs(tag = "c") +
+  theme(plot.margin = margin(5.5, 5.5, 10, 5.5))
 
 
 # --- T4M vs ECHAM6 d18O (annual) ---
@@ -234,75 +225,43 @@ sc_echam.ann <- make_scatter_data(
   x_var  = "proxy"
 )
 
-offset <- mean(sc_echam.ann$points$y)-mean(sc_echam.ann$points$x)
+offset <- mean(sc_echam.ann$points$y) - mean(sc_echam.ann$points$x)
 
 p_sc_echam <- plot_scatter_deming(
   sc_echam.ann,
   ylab = ylab_t4m,
   xlab = xlab_echam_d18O,
   vr   = 1,
-  col  = colors[["ECHAM6 d18O"]]) + 
-  geom_abline(slope = 1, intercept = offset, color = "darkred", linetype = "dashed")
+  col  = colors[["ECHAM6 d18O"]]
+) +
+  geom_abline(
+    slope = 1, intercept = offset,
+    color = "darkred", linetype = "dashed"
+  ) +
+  labs(tag = "d") +
+  theme(plot.margin = margin(10, 5.5, 5.5, 5.5))
 
-p_sc_echam
+p_right <- p_sc_aws / patchwork::plot_spacer() / p_sc_echam +
+  plot_layout(heights = c(1, 0.1, 1))
+
+# ============================================================
+# combined figure
+# ============================================================
+
+p_left  <- (ga / go) + plot_layout(heights = c(1, 1))
+p_right <- (p_sc_aws / p_sc_echam) + plot_layout(heights = c(1, 1))
+
+p_fig3 <- p_left | p_right +
+  plot_layout(widths = c(3.25, 3))
+
+
 ggsave(
-  here::here("output", "figures", "Figure3_scatter_T4M_vs_ECHAM_d18O_annual.pdf"),
-  p_sc_echam, width = 3, height = 3, units = "in",
+  here::here("output", "figures", "Figure3.pdf"),
+  p_fig3, width = 6.25, height = 6.5, units = "in",
   device = cairo_pdf
 )
+
 ggsave(
-  here::here("output", "figures", "Figure3_scatter_T4M_vs_ECHAM_d18O_annual.svg"),
-  p_sc_echam, width = 3, height = 3, units = "in",
+  here::here("output", "figures", "Figure3.svg"),
+  p_fig3, width = 6.25, height = 6.5, units = "in"
 )
-
-
-
-
-
-
-##
-# ---- annual correlations with p-values ----
-
-corr_test <- function(df_wide, x_col, y_col) {
-  dat <- df_wide %>% select({{ x_col }}, {{ y_col }}) %>% drop_na()
-  test <- cor.test(dat[[1]], dat[[2]], method = "pearson")
-  list(
-    r = unname(test$estimate),
-    p = test$p.value,
-    n = nrow(dat)
-  )
-}
-
-df_annual_wide <- df_annual %>%
-  select(source, year, d18O, proxy) %>%
-  pivot_wider(names_from = source, values_from = c(d18O, proxy))
-
-# T4M vs AWS (proxy from AWS t2m + reanalysis precip)
-res_aws <- corr_test(
-  df_annual_wide,
-  d18O_T4M,
-  `proxy_AWS9 t2m precip ERA`
-)
-
-# T4M vs ECHAM6 t2m (proxy from ECHAM6 t2m + ECHAM6 accum)
-res_ech_t <- corr_test(
-  df_annual_wide,
-  d18O_T4M,
-  `proxy_ECHAM6 t2m`
-)
-
-# T4M vs ECHAM6 d18O (proxy from ECHAM6 δ18O + ECHAM6 accum)
-res_ech_o <- corr_test(
-  df_annual_wide,
-  d18O_T4M,
-  `proxy_ECHAM6 d18O`
-)
-
-cat(sprintf("T4M vs AWS:            r = %.3f, p = %.4g, n = %d\n",
-            res_aws$r, res_aws$p, res_aws$n))
-
-cat(sprintf("T4M vs ECHAM6 t2m:      r = %.3f, p = %.4g, n = %d\n",
-            res_ech_t$r, res_ech_t$p, res_ech_t$n))
-
-cat(sprintf("T4M vs ECHAM6 d18O:     r = %.3f, p = %.4g, n = %d\n",
-            res_ech_o$r, res_ech_o$p, res_ech_o$n))
