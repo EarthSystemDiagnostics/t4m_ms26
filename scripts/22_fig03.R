@@ -257,11 +257,11 @@ p_fig3 <- p_left | p_right +
 
 ggsave(
   here::here("output", "figures", "Figure3.pdf"),
-  p_fig3, width = 6.25, height = 6.5, units = "in",
+  p_fig3, width = 7.5, height = 6.5, units = "in",
   device = cairo_pdf
 )
 
 ggsave(
   here::here("output", "figures", "Figure3.svg"),
-  p_fig3, width = 6.25, height = 6.5, units = "in"
+  p_fig3, width = 7.5, height = 6.5, units = "in"
 )

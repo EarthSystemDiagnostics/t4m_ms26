@@ -12,7 +12,20 @@ library(scales)
 dir.create(here::here("output", "figures"), recursive = TRUE, showWarnings = FALSE)
 
 # ---- Figure 1 left ----
-pdf(here("output", "figures", "Figure1_left.pdf"), width = 8, height = 6)
+pdf(here("output", "figures", "Figure1_left.pdf"), width = 8/1.5, height = 6/1.5)
+plot2D(
+  T4M, .var = "d18O",
+  xlim = c(0, 50), ylim = c(4.2, 0),
+  filledContour = TRUE, fill = TRUE,
+  rescale.v = 0.01, hadj = 0.02, line.v = 3,
+  horizontal = FALSE
+)
+dev.off()
+
+
+# ---- Figure 1 left ----
+svglite::svglite(here("output", "figures", "Figure1_left.svg"),
+                 width = 8/1.5, height = 6/1.5)
 plot2D(
   T4M, .var = "d18O",
   xlim = c(0, 50), ylim = c(4.2, 0),
