@@ -21,6 +21,8 @@ colors <- c(
   "ECHAM6 d18O"         = "firebrick"
 )
 
+
+
 set_left_y_scale_inplace <- function(p, breaks, limits) {
   ys <- p$scales$get_scales("y")
   if (is.null(ys)) return(p)
@@ -143,7 +145,9 @@ cor_pair_depth <- function(df, left_source, left_var, right_source, right_var,
     return(tibble::tibble(
       left_source = left_source, left_var = left_var,
       right_source = right_source, right_var = right_var,
-      n = nrow(dat), r = NA_real_, p_value = NA_real_
+      n = nrow(dat),
+      mean_left = NA_real_, mean_right = NA_real_,
+      r = NA_real_, p_value = NA_real_
     ))
   }
   
@@ -154,18 +158,23 @@ cor_pair_depth <- function(df, left_source, left_var, right_source, right_var,
     left_var     = left_var,
     right_source = right_source,
     right_var    = right_var,
-    n       = nrow(dat),
-    r       = unname(ct$estimate),
-    p_value = ct$p.value
+    n            = nrow(dat),
+    mean_left    = mean(dat$x, na.rm = TRUE),
+    mean_right   = mean(dat$y, na.rm = TRUE),
+    r            = unname(ct$estimate),
+    p_value      = ct$p.value
   )
 }
-
 cor_stats <- dplyr::bind_rows(
   cor_pair_depth(df_all, "T4M", "d18O", "AWS9 t2m precip ERA", "proxy"),
   cor_pair_depth(df_all, "T4M", "d18O", "ECHAM6 t2m",          "proxy"),
   cor_pair_depth(df_all, "T4M", "d18O", "ECHAM6 d18O",         "proxy"),
-  cor_pair_depth(df_all, "ECHAM6 t2m", "proxy", "ECHAM6 d18O",         "proxy"),
+  cor_pair_depth(df_all, "ECHAM6 t2m", "proxy", "ECHAM6 d18O", "proxy"),
 ) %>%
-  dplyr::mutate(r = round(r, 3), p_value = signif(p_value, 3))
-
+  dplyr::mutate(
+    r = round(r, 3),
+    p_value = signif(p_value, 3),
+    mean_left = round(mean_left, 2),
+    mean_right = round(mean_right, 2)
+  )
 print(cor_stats)

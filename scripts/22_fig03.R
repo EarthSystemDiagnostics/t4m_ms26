@@ -97,6 +97,57 @@ p_left <- (ga / go) +
   plot_layout(ncol = 1, axes = "collect", guides = "collect") &
   theme(legend.position = "bottom")
 
+
+run_cor <- function(data, x, y, label) {
+  ok <- complete.cases(data[[x]], data[[y]])
+  
+  x_ok <- data[[x]][ok]
+  y_ok <- data[[y]][ok]
+  
+  if (length(x_ok) < 3) {
+    cat(sprintf(
+      "%s: n = %d (too few data)\n",
+      label, length(x_ok)
+    ))
+    return(invisible(NULL))
+  }
+  
+  ct <- cor.test(x_ok, y_ok)
+  
+  cat(sprintf(
+    "%s: r = %.3f, p = %.4g, n = %d, mean_x = %.2f, mean_y = %.2f\n",
+    label,
+    unname(ct$estimate),
+    ct$p.value,
+    length(x_ok),
+    mean(x_ok, na.rm = TRUE),
+    mean(y_ok, na.rm = TRUE)
+  ))
+  
+  invisible(ct)
+}
+
+
+cor_aws <- run_cor(
+  df_annual_wide,
+  x = "d18O_T4M",
+  y = "proxy_AWS9 t2m precip ERA",
+  label = "T4M vs AWS9 t2m precip ERA"
+)
+cor_ech_d18O <- run_cor(
+  df_annual_wide,
+  x = "d18O_T4M",
+  y = "proxy_ECHAM6 t2m",
+  label = "T4M vs ECHAM6 t2m"
+)
+
+cor_ech_d18O <- run_cor(
+  df_annual_wide,
+  x = "d18O_T4M",
+  y = "proxy_ECHAM6 d18O",
+  label = "T4M vs ECHAM6 d18O"
+)
+
 # ============================================================
 # Figure 3B/C: scatter (annual)
 # ============================================================
