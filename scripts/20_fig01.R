@@ -125,7 +125,7 @@ p4 <- ggplot() +
   scale_y_continuous(
     name = "based on AWS t2m (°C)",
     sec.axis = sec_axis(~ (. - m_sim) / (s_sim / s_t4m) + m_t4m,
-                        name = expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")"))
+                        name = expression("T4m" ~~ delta^{18}*O ~ "(" * "\u2030" * ")"))
   ) +
   coord_cartesian(ylim = aws_ylim) +  
   labs(x = "Snow depth (m)", colour = "", title = "+ dating") +
@@ -171,7 +171,7 @@ p4 <- p4 +
     name = NULL,
     sec.axis = sec_axis(
       ~ (. - m_sim) / (s_sim / s_t4m) + m_t4m,
-      name = expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
+      name = expression("T4m" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
     )
   )
 
