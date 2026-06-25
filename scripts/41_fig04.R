@@ -14,7 +14,7 @@ t2m_shift <- 10  # Shift for visual purposes
 colors <- c(
   "Diffused precip.-weighted T" = "steelblue",
   "Annual mean t2m"             = "darkorange3",
-  "T4M (scaled)"                = "black"
+  "T19 (scaled)"                = "black"
 )
 
 # ----------------------------
@@ -39,9 +39,9 @@ ann_t2m <- era5 %>%
   group_by(year) %>%
   summarise(t2m = mean(t2m, na.rm = TRUE), .groups = "drop")
 
-# T4M annual mean d18O (‰)
+# T19 annual mean d18O (‰)
 ann_t4m <- df_all %>%
-  filter(source == "T4M") %>%
+  filter(source == "T19") %>%
   mutate(year = year(date)) %>%
   group_by(year) %>%
   summarise(t4m_d18O = mean(d18O, na.rm = TRUE), .groups = "drop")
@@ -63,7 +63,7 @@ df <- df %>%
   )
 
 # ----------------------------
-# scale T4M to match mean+sd of signal
+# scale T19 to match mean+sd of signal
 # ----------------------------
 overlap <- df %>%
   filter(!is.na(signal), !is.na(t4m_d18O))
@@ -127,7 +127,7 @@ message("  5-year (detrended):  ", round(cor_5y_det, 3))
 p_left <- ggplot(df, aes(x = year)) +
   geom_line(aes(y = signal, color = "Diffused precip.-weighted T"), linewidth = 0.9) +
   geom_line(aes(y = t2m + t2m_shift, color = "Annual mean t2m"), linewidth = 0.9) +
-  geom_line(aes(y = t4m_scaled, color = "T4M (scaled)"), linewidth = 0.9) +
+  geom_line(aes(y = t4m_scaled, color = "T19 (scaled)"), linewidth = 0.9) +
   scale_y_continuous(
     name = "Simulated firn record (°C)",
     sec.axis = sec_axis(~ . - t2m_shift, name = "Annual mean t2m (°C)")

@@ -11,11 +11,11 @@ dir.create(here::here("output", "figures"), recursive = TRUE, showWarnings = FAL
 df_all <- readRDS(here::here("output", "sims", "fig02_df_all.rds"))
 
 year_ticks <- c(1998, 2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2019)
-ylab_left <- expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
+ylab_left <- expression("T19" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
 
 
 colors <- c(
-  "T4M"                 = "black",
+  "T19"                 = "black",
   "AWS9 t2m precip ERA" = "steelblue",
   "ECHAM6 t2m"          = "red",
   "ECHAM6 d18O"         = "firebrick"
@@ -30,14 +30,14 @@ set_left_y_scale_inplace <- function(p, breaks, limits) {
   p + coord_cartesian(ylim = limits)
 }
 
-# common left y scale from T4M
-y_left_rng    <- range(df_all$d18O[df_all$source == "T4M"], na.rm = TRUE)
+# common left y scale from T19
+y_left_rng    <- range(df_all$d18O[df_all$source == "T19"], na.rm = TRUE)
 y_left_breaks <- scales::pretty_breaks(n = 5)(y_left_rng)
 y_left_limits <- range(y_left_breaks)
 
 g.aws <- make_plot_dualaxis(
   df_all,
-  source_left  = "T4M",
+  source_left  = "T19",
   source_right = "AWS9 t2m precip ERA",
   colors = colors,
   ylab_left  = ylab_left,
@@ -50,7 +50,7 @@ g.aws <- make_plot_dualaxis(
 
 g.echamT <- make_plot_dualaxis(
   df_all,
-  source_left  = "T4M",
+  source_left  = "T19",
   source_right = "ECHAM6 t2m",
   colors = colors,
   ylab_left  = ylab_left,
@@ -61,7 +61,7 @@ g.echamT <- make_plot_dualaxis(
 
 g.echamd18O <- make_plot_dualaxis(
   df_all,
-  source_left  = "T4M",
+  source_left  = "T19",
   source_right = "ECHAM6 d18O",
   colors = colors,
   ylab_left  = ylab_left,
@@ -77,7 +77,7 @@ g.echamd18O <- set_left_y_scale_inplace(g.echamd18O, y_left_breaks, y_left_limit
 
 g.aws <- add_year_axis(
   g.aws, df_all,
-  source_left = "T4M",
+  source_left = "T19",
   source_right = "AWS9 t2m precip ERA",
   year_ticks = year_ticks,
   label_years = TRUE,
@@ -166,9 +166,9 @@ cor_pair_depth <- function(df, left_source, left_var, right_source, right_var,
   )
 }
 cor_stats <- dplyr::bind_rows(
-  cor_pair_depth(df_all, "T4M", "d18O", "AWS9 t2m precip ERA", "proxy"),
-  cor_pair_depth(df_all, "T4M", "d18O", "ECHAM6 t2m",          "proxy"),
-  cor_pair_depth(df_all, "T4M", "d18O", "ECHAM6 d18O",         "proxy"),
+  cor_pair_depth(df_all, "T19", "d18O", "AWS9 t2m precip ERA", "proxy"),
+  cor_pair_depth(df_all, "T19", "d18O", "ECHAM6 t2m",          "proxy"),
+  cor_pair_depth(df_all, "T19", "d18O", "ECHAM6 d18O",         "proxy"),
   cor_pair_depth(df_all, "ECHAM6 t2m", "proxy", "ECHAM6 d18O", "proxy"),
 ) %>%
   dplyr::mutate(

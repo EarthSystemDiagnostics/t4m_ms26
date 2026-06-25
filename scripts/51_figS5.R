@@ -25,11 +25,13 @@ df_all <- readRDS(here::here("output", "sims", "fig02_df_all.rds"))
 
 
 # ----------------------------
-if (!exists("ylab_left"))  ylab_left  <- "Temperature (°C)"
-if (!exists("year_ticks")) year_ticks <- 5
+ylab_left <- expression("T19" ~~ delta^{18}*O ~ "(" * "‰" * ")")
+# years to label on the emulated top axis (must be a vector of years, not a count;
+# every-year tick marks are drawn regardless, only these get number labels)
+year_ticks <- c(2000, 2005, 2010, 2015)
 
 colors <- c(
-  "T4M" = "black",
+  "T19" = "black",
   "ERA5 t2m" = "firebrick",
   "AWS9 t2m climatology precip ERA" = "steelblue"
 )
@@ -57,7 +59,7 @@ df_annual <- df_all %>%
 # ----------------------------
 g.aws.clim <- make_plot_dualaxis(
   df_all,
-  source_left  = "T4M",
+  source_left  = "T19",
   source_right = "AWS9 t2m climatology precip ERA",
   colors       = colors,
   ylab_left    = ylab_left,
@@ -71,9 +73,9 @@ g.aws.clim <- make_plot_dualaxis(
 
 g.aws.clim.annual <- make_plot_annual_dualaxis(
   df_annual,
-  source_left  = "T4M",
+  source_left  = "T19",
   source_right = "AWS9 t2m climatology precip ERA",
-  colors     = colors[c("T4M", "AWS9 t2m climatology precip ERA")],
+  colors     = colors[c("T19", "AWS9 t2m climatology precip ERA")],
   ylab_left  = ylab_left,
   ylab_right = "based on AWS t2m climatology (°C)"
 )
@@ -89,6 +91,22 @@ y_range <- range(
 g.aws.clim <- g.aws.clim + coord_cartesian(ylim = y_range, expand = FALSE)
 g.aws.clim.annual <- g.aws.clim.annual + coord_cartesian(ylim = y_range, expand = FALSE)
 
+# the two panels carry identical series -> keep only one legend
+g.aws.clim.annual <- g.aws.clim.annual + ggplot2::guides(colour = "none", color = "none")
+
+# identical axis colouring on both panels:
+# left axis (T19) black, right axis (AWS) blue incl. ticks
+axis_theme <- ggplot2::theme(
+  axis.title.y       = ggplot2::element_text(color = colors[["T19"]]),
+  axis.text.y        = ggplot2::element_text(color = colors[["T19"]]),
+  axis.ticks.y       = ggplot2::element_line(color = colors[["T19"]]),
+  axis.title.y.right = ggplot2::element_text(color = colors[["AWS9 t2m climatology precip ERA"]]),
+  axis.text.y.right  = ggplot2::element_text(color = colors[["AWS9 t2m climatology precip ERA"]]),
+  axis.ticks.y.right = ggplot2::element_line(color = colors[["AWS9 t2m climatology precip ERA"]])
+)
+g.aws.clim        <- g.aws.clim + axis_theme
+g.aws.clim.annual <- g.aws.clim.annual + axis_theme
+
 # ----------------------------
 # layout + export
 # ----------------------------
@@ -96,7 +114,7 @@ p_fig05 <- (g.aws.clim | g.aws.clim.annual) +
   plot_layout(ncol = 2, guides = "collect") &
   theme(legend.position = "bottom")
 
-outfile_base <- here::here("output", "figures", "fig05_climatological_temperature")
+outfile_base <- here::here("output", "figures", "FigureS5_climatological_temperature")
 ggsave(paste0(outfile_base, ".png"), p_fig05, width = 12, height = 5, dpi = 300)
 ggsave(paste0(outfile_base, ".pdf"), p_fig05, width = 12, height = 5, device = cairo_pdf)
 
@@ -108,7 +126,7 @@ p_fig05
 # ============================================================
 
 df_full_ts <- df_all %>%
-  filter(source %in% c("T4M", "AWS9 t2m climatology precip ERA")) %>%
+  filter(source %in% c("T19", "AWS9 t2m climatology precip ERA")) %>%
   group_by(source, depth) %>%
   summarise(
     d18O  = mean(d18O,  na.rm = TRUE),
@@ -121,7 +139,7 @@ df_wide_full <- df_full_ts %>%
 
 dat_full <- df_wide_full %>%
   transmute(
-    t4m = d18O_T4M,
+    t4m = d18O_T19,
     aws = `proxy_AWS9 t2m climatology precip ERA`
   ) %>%
   drop_na()
@@ -129,7 +147,7 @@ dat_full <- df_wide_full %>%
 test_full <- cor.test(dat_full$t4m, dat_full$aws, method = "pearson")
 
 cat(sprintf(
-  "\nFull time series (T4M vs AWS clim): r = %.3f, p = %.4g, n = %d\n",
+  "\nFull time series (T19 vs AWS clim): r = %.3f, p = %.4g, n = %d\n",
   unname(test_full$estimate),
   test_full$p.value,
   nrow(dat_full)
@@ -143,13 +161,13 @@ cat(sprintf(
 # ============================================================
 
 df_wide_ann <- df_annual %>%
-  filter(source %in% c("T4M", "AWS9 t2m climatology precip ERA")) %>%
+  filter(source %in% c("T19", "AWS9 t2m climatology precip ERA")) %>%
   select(year, source, d18O, proxy) %>%
   tidyr::pivot_wider(names_from = source, values_from = c(d18O, proxy))
 
 dat_ann <- df_wide_ann %>%
   transmute(
-    t4m = d18O_T4M,
+    t4m = d18O_T19,
     aws = `proxy_AWS9 t2m climatology precip ERA`
   ) %>%
   drop_na()
@@ -157,7 +175,7 @@ dat_ann <- df_wide_ann %>%
 test_ann <- cor.test(dat_ann$t4m, dat_ann$aws, method = "pearson")
 
 cat(sprintf(
-  "Annual means (T4M vs AWS clim): r = %.3f, p = %.4g, n = %d\n",
+  "Annual means (T19 vs AWS clim): r = %.3f, p = %.4g, n = %d\n",
   test_ann$estimate,
   test_ann$p.value,
   nrow(dat_ann)

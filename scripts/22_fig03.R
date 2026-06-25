@@ -30,23 +30,23 @@ df_annual <- df_all %>%
 # ============================================================
 # Figure 3A: annual dual-axis panels
 # Keep only:
-#   - T4M vs AWS
-#   - T4M vs ECHAM6 d18O
+#   - T19 vs AWS
+#   - T19 vs ECHAM6 d18O
 # ============================================================
 
 colors <- c(
-  "T4M"                 = "black",
+  "T19"                 = "black",
   "AWS9 t2m precip ERA" = "steelblue",
   "ECHAM6 t2m"          = "red",
   "ECHAM6 d18O"         = "firebrick"
 )
 
-ylab_left <- expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
+ylab_left <- expression("T19" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
 
 
 g.aws.annual <- make_plot_annual_dualaxis(
   df_annual,
-  source_left  = "T4M",
+  source_left  = "T19",
   source_right = "AWS9 t2m precip ERA",
   colors       = colors,
   ylab_left    = ylab_left,
@@ -56,7 +56,7 @@ g.aws.annual <- make_plot_annual_dualaxis(
 
 g.echamd18O.annual <- make_plot_annual_dualaxis(
   df_annual,
-  source_left  = "T4M",
+  source_left  = "T19",
   source_right = "ECHAM6 d18O",
   colors       = colors,
   ylab_left    = ylab_left,
@@ -71,9 +71,9 @@ ga <- g.aws.annual +
     axis.title.x = element_blank(),
     axis.text.x  = element_blank(),
     plot.margin  = margin(5.5, 12, 0, 5.5),
-    axis.title.y.left  = element_text(color = colors["T4M"]),
-    axis.text.y.left   = element_text(color = colors["T4M"]),
-    axis.ticks.y.left  = element_line(color = colors["T4M"]),
+    axis.title.y.left  = element_text(color = colors["T19"]),
+    axis.text.y.left   = element_text(color = colors["T19"]),
+    axis.ticks.y.left  = element_line(color = colors["T19"]),
     axis.title.y.right = element_text(color = colors["AWS9 t2m precip ERA"]),
     axis.text.y.right  = element_text(color = colors["AWS9 t2m precip ERA"]),
     axis.ticks.y.right = element_line(color = colors["AWS9 t2m precip ERA"])
@@ -84,9 +84,9 @@ go <- g.echamd18O.annual +
   theme(legend.position = "none") +
   theme(
     plot.margin = margin(0, 12, 5.5, 5.5),
-    axis.title.y.left  = element_text(color = colors["T4M"]),
-    axis.text.y.left   = element_text(color = colors["T4M"]),
-    axis.ticks.y.left  = element_line(color = colors["T4M"]),
+    axis.title.y.left  = element_text(color = colors["T19"]),
+    axis.text.y.left   = element_text(color = colors["T19"]),
+    axis.ticks.y.left  = element_line(color = colors["T19"]),
     axis.title.y.right = element_text(color = colors["ECHAM6 d18O"]),
     axis.text.y.right  = element_text(color = colors["ECHAM6 d18O"]),
     axis.ticks.y.right = element_line(color = colors["ECHAM6 d18O"])
@@ -128,31 +128,38 @@ run_cor <- function(data, x, y, label) {
 }
 
 
+df_annual_wide <- df_annual %>%
+  select(source, year, d18O, proxy) %>%
+  tidyr::pivot_wider(
+    names_from  = source,
+    values_from = c(d18O, proxy)
+  )
+
 cor_aws <- run_cor(
   df_annual_wide,
-  x = "d18O_T4M",
+  x = "d18O_T19",
   y = "proxy_AWS9 t2m precip ERA",
-  label = "T4M vs AWS9 t2m precip ERA"
+  label = "T19 vs AWS9 t2m precip ERA"
 )
 cor_ech_d18O <- run_cor(
   df_annual_wide,
-  x = "d18O_T4M",
+  x = "d18O_T19",
   y = "proxy_ECHAM6 t2m",
-  label = "T4M vs ECHAM6 t2m"
+  label = "T19 vs ECHAM6 t2m"
 )
 
 cor_ech_d18O <- run_cor(
   df_annual_wide,
-  x = "d18O_T4M",
+  x = "d18O_T19",
   y = "proxy_ECHAM6 d18O",
-  label = "T4M vs ECHAM6 d18O"
+  label = "T19 vs ECHAM6 d18O"
 )
 
 # ============================================================
 # Figure 3B/C: scatter (annual)
 # ============================================================
 
-ylab_t4m <- expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
+ylab_t4m <- expression("T19" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
 
 xlab_echam_d18O <- expression("based on ECHAM6 " * delta^{18} * O ~ "(" * "\u2030" * ")")
 xlab_aws <- "based on AWS t2m (°C)"
@@ -247,14 +254,16 @@ plot_scatter_deming <- function(sc, xlab, ylab, vr = 1,
     theme(panel.grid.minor = element_blank())
 }
 
-# --- T4M vs AWS (annual) ---
+# --- T19 vs AWS (annual) ---
 sc_aws.ann <- make_scatter_data(
   df_annual2,
-  y_name = "T4M",
+  y_name = "T19",
   x_name = "AWS9 t2m precip ERA",
   y_var  = "d18O",
   x_var  = "proxy"
 )
+
+r2_aws <- cor(sc_aws.ann$points$x, sc_aws.ann$points$y)^2
 
 p_sc_aws <- plot_scatter_deming(
   sc_aws.ann,
@@ -263,20 +272,25 @@ p_sc_aws <- plot_scatter_deming(
   vr   = 1,
   col  = colors[["AWS9 t2m precip ERA"]]
 ) +
+  annotate("text", x = -Inf, y = Inf,
+           label = sprintf("R^2 == %.2f", r2_aws), parse = TRUE,
+           hjust = -0.25, vjust = 1.6, size = 3.5) +
   labs(tag = "c") +
   theme(plot.margin = margin(5.5, 5.5, 10, 5.5))
 
 
-# --- T4M vs ECHAM6 d18O (annual) ---
+# --- T19 vs ECHAM6 d18O (annual) ---
 sc_echam.ann <- make_scatter_data(
   df_annual2,
-  y_name = "T4M",
+  y_name = "T19",
   x_name = "ECHAM6 d18O",
   y_var  = "d18O",
   x_var  = "proxy"
 )
 
 offset <- mean(sc_echam.ann$points$y) - mean(sc_echam.ann$points$x)
+
+r2_echam <- cor(sc_echam.ann$points$x, sc_echam.ann$points$y)^2
 
 p_sc_echam <- plot_scatter_deming(
   sc_echam.ann,
@@ -289,6 +303,9 @@ p_sc_echam <- plot_scatter_deming(
     slope = 1, intercept = offset,
     color = "darkred", linetype = "dashed"
   ) +
+  annotate("text", x = -Inf, y = Inf,
+           label = sprintf("R^2 == %.2f", r2_echam), parse = TRUE,
+           hjust = -0.25, vjust = 1.6, size = 3.5) +
   labs(tag = "d") +
   theme(plot.margin = margin(10, 5.5, 5.5, 5.5))
 

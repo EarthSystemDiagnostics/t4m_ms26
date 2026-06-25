@@ -2,9 +2,9 @@
 # Reusable plotting helpers for dual-axis snow-profile plots
 # Used in Figure 2, Figure 5, etc.
 make_plot_dualaxis <- function(df,
-                               source_left  = "T4M",
+                               source_left  = "T19",
                                source_right = "ERA5",
-                               colors       = c("T4M"="steelblue", "ERA5"="firebrick"),
+                               colors       = c("T19"="steelblue", "ERA5"="firebrick"),
                                ylab_left    = expression(delta^{18}*O~"\u2030"),
                                ylab_right   = "Proxy",
                                year_ticks   = NULL,

@@ -1,6 +1,6 @@
 # t4m_ms26
 
-Scripts and data for the manuscript 2026GL123309, Even in low-accumulation East Antarctica, stable water isotopes record interannual temperature variability, which has been submitted for possible publication in Geophysical Research Letters.
+Scripts and data for the manuscript 2026GL123309, Even in low-accumulation Dronning Maud Land, Antarctica, stable water isotopes record interannual temperature variability, which has been submitted for possible publication in Geophysical Research Letters.
 
 Thomas Laepple¹,²*, Thomas Münch¹*, Johannes Freitag³, Maria Hörhold³, Martin Werner³, Melanie Behrens³, Nora Hirsch¹ *These authors contributed equally to this work
 
@@ -38,7 +38,8 @@ scripts/20_fig01.R
 scripts/21_fig02.R
 scripts/22_fig03.R
 scripts/41_fig04.R
-scripts/51_fig05.R
+scripts/51_figS5.R
+scripts/61_figS1_precip_comparison.R
 
 All figures will be written to `output/figures/`.
 

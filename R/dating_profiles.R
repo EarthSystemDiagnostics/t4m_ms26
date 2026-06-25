@@ -48,23 +48,23 @@ DateSimByAgeModel <- function(sim, agemodel) {
 #' @param agemodel A data.frame with age–depth information, containing
 #'   columns \code{year} (decimal year) and \code{depth}.
 #' @param source Optional character string naming the data source
-#'   (default "T4M").
+#'   (default "T19").
 #'
 #' @return A tibble with columns:
 #'   \describe{
 #'     \item{depth}{Numeric vector of depth bin centers (same as \code{t4m$depth})}
 #'     \item{d18O}{Numeric vector of measured isotope values}
 #'     \item{date}{Calendar date corresponding to each depth (converted from decimal year)}
-#'     \item{source}{Character label of the profile ("T4M" by default)}
+#'     \item{source}{Character label of the profile ("T19" by default)}
 #'   }
 #'
 #' @examples
 #' \dontrun{
-#' t4m_dated <- TrenchWithDates(t4m, agemodel, source = "T4M")
+#' t4m_dated <- TrenchWithDates(t4m, agemodel, source = "T19")
 #' ggplot2::ggplot(t4m_dated, ggplot2::aes(x = depth, y = d18O)) +
 #'   ggplot2::geom_line()
 #' }
-TrenchWithDates <- function(t4m, agemodel, source = "T4M") {
+TrenchWithDates <- function(t4m, agemodel, source = "T19") {
   # interpolate decimal years for trench depths
   dec_years <- approx(
     x = agemodel$depth,

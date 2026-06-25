@@ -40,13 +40,13 @@ sims <- readRDS(here("output", "sims", "fig01_sims.rds"))
 
 df_fig2 <- readRDS(here::here("output", "sims", "fig02_df_all.rds"))
 
-aws_ylim <- range(sim1$signal, na.rm = TRUE)
-pad <- diff(aws_ylim) * 0.09
-aws_ylim <- aws_ylim + c(-pad, pad)
-
 sim1 <- sims$sim1
 sim2 <- sims$sim2
 sim3 <- sims$sim3
+
+aws_ylim <- range(sim1$signal, na.rm = TRUE)
+pad <- diff(aws_ylim) * 0.09
+aws_ylim <- aws_ylim + c(-pad, pad)
 
 
 df_all <- bind_rows(
@@ -67,7 +67,7 @@ df_fig2 <- readRDS(here::here("output", "sims", "fig02_df_all.rds"))
 
 
 colors <- c(
-  "T4M"                 = "black",
+  "T19"                 = "black",
   "AWS9 t2m precip ERA" = "steelblue",
   "ECHAM6 t2m"          = "red",
   "ECHAM6 d18O"         = "firebrick"
@@ -75,7 +75,7 @@ colors <- c(
 
 
 # y label like in Fig2 (with a bit more space + (‰))
-ylab_left <- expression("T4M" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
+ylab_left <- expression("T19" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
 panel_sim <- function(sim, title, lw = 0.3,
                       ylab = "based on AWS t2m (°C)",
                       y_limits = aws_ylim) {
@@ -99,11 +99,11 @@ p2 <- panel_sim(sim2, "variable accumulation",  lw = 0.9)
 p3 <- panel_sim(sim3, "+ diffusion",            lw = 0.9)
 
 # ---- bottom panel: as Fig2 (top panel) ----
-df_bottom <- df_fig2 %>% filter(source %in% c("T4M", "AWS9 t2m precip ERA"))
+df_bottom <- df_fig2 %>% filter(source %in% c("T19", "AWS9 t2m precip ERA"))
 
 
 # ---- bottom panel data ----
-df_t4m <- df_fig2 %>% filter(source == "T4M") %>% select(depth, d18O)
+df_t4m <- df_fig2 %>% filter(source == "T19") %>% select(depth, d18O)
 df_sim <- df_fig2 %>% filter(source == "AWS9 t2m precip ERA") %>% select(depth, proxy)
 
 # ---- bottom panel: left = simulation (°C), right = T4M δ18O (‰) ----
@@ -119,13 +119,13 @@ p4 <- ggplot() +
             aes(x = depth, y = proxy, colour = "AWS9 t2m precip ERA"),
             linewidth = 0.9) +
   geom_line(data = df_t4m_plot,
-            aes(x = depth, y = d18O_on_sim, colour = "T4M"),
+            aes(x = depth, y = d18O_on_sim, colour = "T19"),
             linewidth = 0.9) +
-  scale_colour_manual(values = colors, breaks = c("AWS9 t2m precip ERA","T4M"), labels = c("AWS sim", "T4M")) +
+  scale_colour_manual(values = colors, breaks = c("AWS9 t2m precip ERA","T19"), labels = c("AWS sim", "T19")) +
   scale_y_continuous(
     name = "based on AWS t2m (°C)",
     sec.axis = sec_axis(~ (. - m_sim) / (s_sim / s_t4m) + m_t4m,
-                        name = expression("T4m" ~~ delta^{18}*O ~ "(" * "\u2030" * ")"))
+                        name = expression("T19" ~~ delta^{18}*O ~ "(" * "\u2030" * ")"))
   ) +
   coord_cartesian(ylim = aws_ylim) +  
   labs(x = "Snow depth (m)", colour = "", title = "+ dating") +
@@ -136,8 +136,8 @@ p4 <- ggplot() +
     legend.position = "none",
     axis.title.y      = element_text(color = colors[["AWS9 t2m precip ERA"]]),
     axis.text.y       = element_text(color = colors[["AWS9 t2m precip ERA"]]),
-    axis.title.y.right= element_text(color = colors[["T4M"]]),
-    axis.text.y.right = element_text(color = colors[["T4M"]])
+    axis.title.y.right= element_text(color = colors[["T19"]]),
+    axis.text.y.right = element_text(color = colors[["T19"]])
   )
 
 # ---- align x axis label only on bottom plot ----
@@ -171,7 +171,7 @@ p4 <- p4 +
     name = NULL,
     sec.axis = sec_axis(
       ~ (. - m_sim) / (s_sim / s_t4m) + m_t4m,
-      name = expression("T4m" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
+      name = expression("T19" ~~ delta^{18}*O ~ "(" * "\u2030" * ")")
     )
   )
 
