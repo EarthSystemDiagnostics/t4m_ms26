@@ -29,6 +29,7 @@ Code: GPL-3.0-or-later. Data under `data/`: CC-BY-4.0. See `LICENSE`.
 ## Reproducing the analysis
 
 1. Clone the repository
+   Required R packages from GitHub: `remotes::install_github("EarthSystemDiagnostics/FirnR@v0.2.0")` and `remotes::install_github("EarthSystemDiagnostics/TrenchR")`; all others from CRAN.
 2. Run scripts in the following order:
 
 scripts/00_setup.R
