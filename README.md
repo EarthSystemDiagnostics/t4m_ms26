@@ -1,5 +1,7 @@
 # t4m_ms26
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24272763.svg)](https://doi.org/10.5281/zenodo.24272763)
+
 Scripts and data for the manuscript 2026GL123309, Even in low-accumulation Dronning Maud Land, Antarctica, stable water isotopes record interannual temperature variability, accepted for publication in Geophysical Research Letters.
 
 Thomas Laepple¹,²*, Thomas Münch¹*, Johannes Freitag³, Maria Hörhold³, Martin Werner³, Melanie Behrens³, Nora Hirsch¹ *These authors contributed equally to this work
@@ -10,7 +12,7 @@ Thomas Laepple¹,²*, Thomas Münch¹*, Johannes Freitag³, Maria Hörhold³, Ma
 
 - T19 trench δ¹⁸O data (trench profiles on a common depth scale, stack, raw samples): PANGAEA, https://doi.org/10.1594/PANGAEA.998360
 - FirnR R package (v0.2.0), used for the simulations: https://doi.org/10.5281/zenodo.24272335 (source: https://github.com/EarthSystemDiagnostics/FirnR)
-- This repository is archived on Zenodo with each release.
+- This repository is archived on Zenodo: https://doi.org/10.5281/zenodo.24272763 (all versions); v1.0.0: https://doi.org/10.5281/zenodo.24272764
 
 Code: GPL-3.0-or-later. Data under `data/`: CC-BY-4.0. See `LICENSE`.
 
