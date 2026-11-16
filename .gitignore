@@ -12,9 +12,10 @@ __pycache__/
 *.pyc
 
 # Outputs & derived data (typisch nicht versionieren)
-data/interim/
-data/processed/
 output/
 
 # OS
 .DS_Store
+
+/.quarto/
+**/*.quarto_ipynb

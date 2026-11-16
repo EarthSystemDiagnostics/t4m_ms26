@@ -1,0 +1,21 @@
+{
+  "title": "t4m_ms26: Code and data for \"Even in low-accumulation Dronning Maud Land, Antarctica, stable water isotopes record interannual temperature variability\"",
+  "version": "1.0.0",
+  "upload_type": "software",
+  "license": "GPL-3.0-or-later",
+  "creators": [
+    {"name": "Laepple, Thomas", "affiliation": "Alfred-Wegener-Institut Helmholtz-Zentrum für Polar- und Meeresforschung, Potsdam; MARUM, University of Bremen"},
+    {"name": "Münch, Thomas", "affiliation": "Alfred-Wegener-Institut Helmholtz-Zentrum für Polar- und Meeresforschung, Potsdam"},
+    {"name": "Freitag, Johannes", "affiliation": "Alfred-Wegener-Institut Helmholtz-Zentrum für Polar- und Meeresforschung, Bremerhaven"},
+    {"name": "Hörhold, Maria", "affiliation": "Alfred-Wegener-Institut Helmholtz-Zentrum für Polar- und Meeresforschung, Bremerhaven"},
+    {"name": "Werner, Martin", "affiliation": "Alfred-Wegener-Institut Helmholtz-Zentrum für Polar- und Meeresforschung, Bremerhaven"},
+    {"name": "Behrens, Melanie", "affiliation": "Alfred-Wegener-Institut Helmholtz-Zentrum für Polar- und Meeresforschung, Bremerhaven"},
+    {"name": "Hirsch, Nora", "affiliation": "Alfred-Wegener-Institut Helmholtz-Zentrum für Polar- und Meeresforschung, Potsdam"}
+  ],
+  "description": "R scripts, helper functions and processed input data to reproduce the analyses and figures (main text and Supporting Information Figures S1 and S5) of Laepple, Münch et al., Geophysical Research Letters, manuscript 2026GL123309. Code is licensed GPL-3.0-or-later, data files under data/ CC-BY-4.0. The T19 trench d18O data are published on PANGAEA (doi:10.1594/PANGAEA.998360). The T19 depth-age scale is included as processed input. Simulations use the FirnR package (doi:10.5281/zenodo.24272335).",
+  "keywords": ["stable water isotopes", "firn", "snow trench", "temperature variability", "Dronning Maud Land", "Kohnen Station", "Antarctica"],
+  "related_identifiers": [
+    {"identifier": "10.1594/PANGAEA.998360", "relation": "references", "scheme": "doi", "resource_type": "dataset"},
+    {"identifier": "10.5281/zenodo.24272335", "relation": "requires", "scheme": "doi", "resource_type": "software"}
+  ]
+}
